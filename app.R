@@ -8,6 +8,8 @@ load("cost.model.3.Rdata")
 load("qaly.model.3.Rdata")
 load("defaults.Rdata")
 
+
+
 ages <- 22:60
 defaults <- defaults[rep(1, length(ages)),]
 defaults$IT <- ages
@@ -59,7 +61,7 @@ ui <- pageWithSidebar(
       tabPanel(
         "General",
         br(),
-        sliderInput("sac", h3("Screening Assay Cost"), min=100, max=300, value=200), # Q
+        sliderInput("sac", h3("Screening Assay Cost"), min=100, max=300, value=250), # Q
         sliderInput("cac", h3("Confirming Assay Cost"), min=100, max=300, value=186), # R
         sliderInput("ls.variant.prev", h3("Lynch Variant Prevalence (%)"), min=0.255, max=0.427, 0.341), # CO
         sliderInput("fh.variant.prev", h3("FH Variant Prevalence (%)"), min=0.235, max=0.611, 0.39), # EN
@@ -165,17 +167,19 @@ server <- function(input, output)
   })
 
   output$qalyPlot <- renderPlot({
-    plot(x=ages, y=100000*v$qalys, type="p", xlab="Age at Time of Screening (y)", ylab="discounted QALY per 100,000")
+    plot(x=ages, y=100000*(v$qalys), type="p", xlab="Age at Time of Screening (y)", ylab="Incremental QALY per 100,000")
   })
   
   output$costPlot <- renderPlot({
-    plot(x=ages, y=v$costs, type="p", xlab="Age at Time of Screening (y)", ylab="discounted Cost ($)")
+    plot(x=ages, y=v$costs/10, type="p", xlab="Age at Time of Screening (y)", ylab="Incremental Cost per 100,000 ($ millions)")
   })
   output$icerPlot <- renderPlot({
-    icer <- (v$costs-refcosts)/(v$qalys-refqalys)/1000
+    #icer <- (v$costs-refcosts)/(v$qalys-refqalys)/10000
+    icer <- (v$costs)/(v$qalys)/1000
     ymin <- min(c(-1, icer[is.finite(icer)]))
     ymax <- max(c(1,  icer[is.finite(icer)]))
-    plot(x=ages, y=icer, type="p", xlab="Age (y)", ylab="ICER ($1000)", ylim=c(ymin, ymax))
+    plot(x=ages, y=icer, type="p", xlab="Age (y)", ylab="Cost per QALY Gained ($ thousands)", ylim=c(ymin, ymax))
+    abline(h=100)
   })
 }
 
