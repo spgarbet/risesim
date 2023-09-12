@@ -116,6 +116,9 @@ ui <- pageWithSidebar(
     plotOutput("qalyPlot"),
     plotOutput("costPlot"),
     plotOutput("icerPlot"),
+    p("This meta-model represents the model used in Guzauskas GF, et al., 'Population Genomic Screening for Three Common Hereditary Conditions : A Cost-Effectiveness Analysis'. Ann Intern Med. 2023 May;176(5):585-595. doi: 10.7326/M22-0846. It is a regression of the probability sensitivity analysis data created via block selection using splines and interactions in R. The code is published at",
+      a(href="https://github.com/spgarbet/risesim", "https://github.com/spgarbet/risesim"), 
+      "."),
     p("Built using ",
       a(href="https://www.r-project.org/", img(src="Rlogo.png", alt="R", width="60")),
       "with the ",
@@ -167,18 +170,23 @@ server <- function(input, output)
   })
 
   output$qalyPlot <- renderPlot({
-    plot(x=ages, y=100000*(v$qalys), type="p", xlab="Age at Time of Screening (y)", ylab="Incremental QALY per 100,000")
+    plot(x=ages, y=100000*(v$qalys), type="p",
+         xlab="Age at Time of Screening (y)", ylab="Incremental QALY per 100,000",
+         ylim=c(100, 550))
   })
   
   output$costPlot <- renderPlot({
-    plot(x=ages, y=v$costs/10, type="p", xlab="Age at Time of Screening (y)", ylab="Incremental Cost per 100,000 ($ millions)")
+    plot(x=ages, y=v$costs/10, type="p",
+         xlab="Age at Time of Screening (y)", ylab="Incremental Cost per 100,000 ($ millions)",
+         ylim=c(15,45))
   })
   output$icerPlot <- renderPlot({
     #icer <- (v$costs-refcosts)/(v$qalys-refqalys)/10000
     icer <- (v$costs)/(v$qalys)/1000
-    ymin <- min(c(-1, icer[is.finite(icer)]))
-    ymax <- max(c(1,  icer[is.finite(icer)]))
-    plot(x=ages, y=icer, type="p", xlab="Age (y)", ylab="Cost per QALY Gained ($ thousands)", ylim=c(ymin, ymax))
+#    ymin <- min(c(-1, icer[is.finite(icer)]))
+#    ymax <- max(c(1,  icer[is.finite(icer)]))
+    plot(x=ages, y=icer, type="p", xlab="Age (y)", ylab="Cost per QALY Gained ($ thousands)",
+         ylim=c(0, 200))
     abline(h=100)
   })
 }
